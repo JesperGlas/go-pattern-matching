@@ -19,7 +19,7 @@ func main() {
 
 	// Load sequence as string from file
 	var sequence string
-	data, err := os.ReadFile("data/large.txt")
+	data, err := os.ReadFile("data/huge.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -29,8 +29,16 @@ func main() {
 	fmt.Println()
 	log.Println("Naive pattern matching:")
 	start := time.Now()
-	status, matches, checks := naive.NaiveMatching(pattern, sequence)
+	matches, checks := naive.CountOccurence(pattern, sequence)
 	duration := time.Since(start)
-	log.Printf("Status: %v (%d/%d matches|checks)\n", status, matches, checks)
+	log.Printf("Status: %d/%d (matches|checks)\n", matches, checks)
+	log.Printf("Runtime: %d ms\n", duration.Microseconds())
+
+	fmt.Println()
+	log.Println("Naive pattern matching (Concurrent batches):")
+	start = time.Now()
+	matches, checks = naive.CountOccurenceConcurrent(pattern, sequence, 10000)
+	duration = time.Since(start)
+	log.Printf("Status: %d/%d (matches|checks)\n", matches, checks)
 	log.Printf("Runtime: %d ms\n", duration.Microseconds())
 }
