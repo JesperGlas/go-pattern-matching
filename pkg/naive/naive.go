@@ -85,10 +85,12 @@ func CountOccurenceConcurrent(pattern string, sequence string, batchSize int) (i
 		}
 		wg.Add(1)
 		go func(wg *sync.WaitGroup) {
+			defer wg.Done()
 			matches, checks := CountOccurence(pattern, sequence[start:end])
 			incrementCounter(sharedChecks, checks)
 			incrementCounter(sharedMatches, matches)
 		}(&wg)
 	}
+	wg.Wait()
 	return sharedMatches.value, sharedChecks.value
 }
