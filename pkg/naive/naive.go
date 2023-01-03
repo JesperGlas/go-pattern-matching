@@ -74,15 +74,24 @@ func incrementCounter(counter *mutexCounter, value int) {
 *	(int) - total number of checks performed
 */
 func CountOccurenceConcurrent(pattern string, sequence string, batchSize int) (int, int) {
+	// init counters for checks and matches
 	sharedChecks := initCounter()
 	sharedMatches := initCounter()
+
+	// define a waitgroup for goroutines
 	var wg sync.WaitGroup
+
+	// create batches for goroutines
 	for i := 0; i < len(sequence); i += batchSize {
+		// define start index
 		start := i
-		end := i + batchSize
+
+		end := i + batchSize + len(pattern)
 		if end > len(sequence) {
 			end = len(sequence)
 		}
+
+		// add worker to waitgroup and start worker
 		wg.Add(1)
 		go func(wg *sync.WaitGroup) {
 			defer wg.Done()
@@ -91,6 +100,8 @@ func CountOccurenceConcurrent(pattern string, sequence string, batchSize int) (i
 			incrementCounter(sharedMatches, matches)
 		}(&wg)
 	}
+
+	// wait for all goroutines to finish before return
 	wg.Wait()
 	return sharedMatches.value, sharedChecks.value
 }
